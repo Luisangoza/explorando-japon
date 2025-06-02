@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explorando Japón: Un Viaje Interactivo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Visualization & Content Choices: 
+        - General Info: Text, conceptual fashion gallery (HTML structure for image placeholders).
+        - Food: Text descriptions for dishes, info cards for CDMX restaurants.
+        - Anime/Manga: Text descriptions for series, placeholder for user avatar image.
+        - Music: JS-driven tabs for artists, embedded video examples, playlist link, conceptual image gallery.
+        - Endress+Hauser: Text, embedded YouTube video.
+        - Culture: Text (comparative Japan-CDMX), embedded YouTube video.
+        Interactions: Smooth scroll navigation, mobile menu, JS tabs for artists.
+    -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f5f4; /* stone-100 */
+            color: #374151; /* gray-700 */
+        }
+        .nav-link {
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover, .nav-link.active { /* Active class to be managed by JS if needed for scroll-spy, or manually set for current section */
+            color: #ffffff;
+            background-color: #ef4444; /* red-500 */
+        }
+        .section-title {
+            border-bottom: 3px solid #ef4444; /* red-500 */
+            padding-bottom: 0.5rem;
+            display: inline-block;
+        }
+        .content-card {
+            background-color: #ffffff; /* white */
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .content-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); /* shadow-2xl */
+        }
+        .tab-button {
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .tab-button.active {
+            background-color: #dc2626; /* red-600 */
+            color: #ffffff;
+        }
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 */
+            height: 0;
+            overflow: hidden;
+            max-width: 100%;
+            background: #000;
+            border-radius: 0.5rem; /* rounded-lg */
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .fashion-gallery-item {
+            background-color: #e5e7eb; /* gray-200 */
+            border: 1px solid #d1d5db; /* gray-300 */
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <nav id="navbar" class="bg-white/90 backdrop-blur-md sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0">
+                    <a href="#home" class="text-2xl font-bold text-red-600">Japón Interactivo</a>
+                </div>
+                <div class="hidden lg:block">
+                    <div class="ml-10 flex items-baseline space-x-1">
+                        <a href="#info-general" class="nav-link text-gray-600 px-3 py-2 rounded-md text-sm font-medium">Info General</a>
+                        <a href="#comida" class="nav-link text-gray-600 px-3 py-2 rounded-md text-sm font-medium">Comida</a>
+                        <a href="#anime-manga" class="nav-link text-gray-600 px-3 py-2 rounded-md text-sm font-medium">Anime/Manga</a>
+                        <a href="#musica" class="nav-link text-gray-600 px-3 py-2 rounded-md text-sm font-medium">Música</a>
+                        <a href="#endress" class="nav-link text-gray-600 px-3 py-2 rounded-md text-sm font-medium">Endress+Hauser</a>
+                        <a href="#cultura" class="nav-link text-gray-600 px-3 py-2 rounded-md text-sm font-medium">Cultura</a>
+                    </div>
+                </div>
+                <div class="lg:hidden">
+                    <button id="mobile-menu-button" class="text-gray-600 hover:text-red-500 focus:outline-none">
+                        <span class="sr-only">Abrir menú principal</span>
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div id="mobile-menu" class="lg:hidden hidden">
+            <a href="#info-general" class="block nav-link text-gray-600 px-3 py-2 rounded-md text-base font-medium">Info General</a>
+            <a href="#comida" class="block nav-link text-gray-600 px-3 py-2 rounded-md text-base font-medium">Comida</a>
+            <a href="#anime-manga" class="block nav-link text-gray-600 px-3 py-2 rounded-md text-base font-medium">Anime/Manga</a>
+            <a href="#musica" class="block nav-link text-gray-600 px-3 py-2 rounded-md text-base font-medium">Música</a>
+            <a href="#endress" class="block nav-link text-gray-600 px-3 py-2 rounded-md text-base font-medium">Endress+Hauser</a>
+            <a href="#cultura" class="block nav-link text-gray-600 px-3 py-2 rounded-md text-base font-medium">Cultura</a>
+        </div>
+    </nav>
+
+    <header id="home" class="py-12 bg-red-500 text-white text-center">
+        <div class="max-w-4xl mx-auto px-4">
+            <h1 class="text-4xl sm:text-5xl font-extrabold leading-tight">Un Viaje Fascinante por Japón</h1>
+            <p class="text-lg sm:text-xl mt-4 opacity-90">Explora su música vibrante, cultura ancestral y moderna, deliciosa gastronomía, el universo del anime y manga, y mucho más.</p>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        
+        <section id="info-general" class="py-16 scroll-mt-16">
+            <h2 class="text-3xl font-bold text-center section-title mb-12">Discover Japan: Essential Facts and Figures</h2>
+            <div class="grid md:grid-cols-2 gap-8 items-start">
+                <div class="content-card p-6">
+                    <h3 class="text-2xl font-semibold text-red-600 mb-4">Japón en Resumen</h3>
+                    <ul class="space-y-2 text-gray-700">
+                        <li><strong>Nombre Oficial:</strong> Japón (日本 - Nippon/Nihon)</li>
+                        <li><strong>Capital:</strong> Tokio</li>
+                        <li><strong>Ubicación:</strong> Asia Oriental, país insular. Compuesto por un archipiélago de miles de islas, las principales son Honshu, Hokkaido, Kyushu y Shikoku.</li>
+                        <li><strong>Población:</strong> Aproximadamente 123-125 millones de habitantes.</li>
+                        <li><strong>Idioma:</strong> Japonés</li>
+                        <li><strong>Moneda:</strong> Yen (JPY - ¥)</li>
+                        <li><strong>Bandera:</strong> Hinomaru (日の丸) - un disco rojo (representando el sol) sobre un fondo blanco.</li>
+                        <li><strong>Forma de Gobierno:</strong> Monarquía constitucional con democracia parlamentaria. El Emperador es el símbolo del Estado.</li>
+                        <li><strong>Dato Icónico:</strong> El Monte Fuji (富士山 - Fujisan), el pico más alto y un símbolo sagrado de Japón.</li>
+                    </ul>
+                    <p class="mt-4 text-gray-600 text-sm">Japón es un país de fascinantes contrastes, donde tradiciones milenarias conviven con una tecnología de vanguardia y una cultura pop influyente a nivel mundial.</p>
+                </div>
+                <div class="content-card p-6">
+                    <h3 class="text-2xl font-semibold text-red-600 mb-4">Evolución del Estilo Juvenil (1995-2025)</h3>
+                    <p class="text-gray-600 mb-4 text-sm">Un vistazo a algunas tendencias de moda femenina que marcaron época:</p>
+                    <div class="space-y-3">
+                        <div class="fashion-gallery-item p-3 rounded"><strong>Aprox. 1998: Kogal/Gal</strong> - Uniformes modificados, piel bronceada, loose socks. Rebeldía juvenil en Shibuya.</div>
+                        <div class="fashion-gallery-item p-3 rounded"><strong>Aprox. 2003: Decora Kei</strong> - Explosión de color, capas, accesorios múltiples. Individualismo en Harajuku.</div>
+                        <div class="fashion-gallery-item p-3 rounded"><strong>Aprox. 2009: Mori Girl</strong> - Estilo etéreo, tonos tierra, inspirado en la naturaleza y la comodidad.</div>
+                        <div class="fashion-gallery-item p-3 rounded"><strong>Aprox. 2015: Minimalismo Japonés</strong> - Líneas limpias, colores neutros, funcionalidad discreta.</div>
+                        <div class="fashion-gallery-item p-3 rounded"><strong>Aprox. 2023: Diversidad Digital</strong> - Y2K revival, K-Pop, genderless, microtendencias virales.</div>
+                    </div>
+                    <p class="mt-3 text-gray-500 text-xs">Nota: Esta galería es conceptual. En la página real se usarían imágenes representativas para cada estilo.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="comida" class="py-16 scroll-mt-16">
+            <h2 class="text-3xl font-bold text-center section-title mb-12">A Culinary Journey: Sabores Japoneses en CDMX</h2>
+            <div class="content-card p-6 md:p-8">
+                <p class="text-lg text-gray-600 mb-8 text-center">La cocina japonesa ha conquistado paladares globalmente, y Ciudad de México no es la excepción. Aquí exploramos platillos icónicos y algunas recomendaciones personales para disfrutarlos en la capital.</p>
+                
+                <h3 class="text-2xl font-semibold text-red-600 mb-6">Platillos que Encantan</h3>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                    <div class="border p-4 rounded-lg bg-stone-50">
+                        <h4 class="font-bold text-xl text-gray-800 mb-2">Onigiri (おにぎり)</h4>
+                        <p class="text-sm text-gray-600">Bolas de arroz versátiles, a menudo envueltas en nori y con rellenos variados (salmón, atún, umeboshi). El snack perfecto, cada vez más popular en tiendas y restaurantes de CDMX.</p>
+                         </div>
+                    <div class="border p-4 rounded-lg bg-stone-50">
+                        <h4 class="font-bold text-xl text-gray-800 mb-2">Sandos (サンド)</h4>
+                        <p class="text-sm text-gray-600">Sándwiches al estilo japonés con pan de leche shokupan extra suave. Destaca el Katsu Sando. El pan de Panya Sam / El Shokupan es ideal.</p>
+                         </div>
+                    <div class="border p-4 rounded-lg bg-stone-50">
+                        <h4 class="font-bold text-xl text-gray-800 mb-2">Ramen (ラーメン)</h4>
+                        <p class="text-sm text-gray-600">Reconfortante caldo con fideos, chashu, huevo marinado y nori. MO+F podría ser una buena opción para probarlo en CDMX.</p>
+                         </div>
+                    <div class="border p-4 rounded-lg bg-stone-50">
+                        <h4 class="font-bold text-xl text-gray-800 mb-2">Sopa Miso (味噌汁)</h4>
+                        <p class="text-sm text-gray-600">Caldo fundamental con dashi y pasta de miso, tofu y wakame. Un clásico en casi cualquier restaurante japonés en la ciudad, incluyendo ABURIYA BY SHIGE TAKANE o MO+F.</p>
+                         </div>
+                    <div class="border p-4 rounded-lg bg-stone-50">
+                        <h4 class="font-bold text-xl text-gray-800 mb-2">Okonomiyaki (お好み焼き)</h4>
+                        <p class="text-sm text-gray-600">"Pizza/panqueque" japonesa a la plancha con diversos ingredientes, salsa especial y katsuobushi. Búscalo en izakayas o restaurantes especializados.</p>
+                         </div>
+                    <div class="border p-4 rounded-lg bg-stone-50">
+                        <h4 class="font-bold text-xl text-gray-800 mb-2">Takoyaki (たこ焼き)</h4>
+                        <p class="text-sm text-gray-600">Deliciosas bolitas de masa rellenas de pulpo, cocinadas en plancha especial. Un popular snack callejero, a veces disponible en festivales japoneses.</p>
+                         </div>
+                    <div class="border p-4 rounded-lg bg-stone-50">
+                        <h4 class="font-bold text-xl text-gray-800 mb-2">Nikuman (肉まん)</h4>
+                        <p class="text-sm text-gray-600">Bollos esponjosos al vapor, rellenos de carne de cerdo sazonada. Un snack caliente ideal, disponible en algunas panaderías y tiendas asiáticas.</p>
+                         </div>
+                </div>
+
+                <h3 class="text-2xl font-semibold text-red-600 mb-6">Rincones Japoneses en CDMX: Mis Recomendaciones</h3>
+                <div class="space-y-6">
+                    <div>
+                        <h4 class="font-bold text-xl text-gray-800">Panya Sam / El Shokupan</h4>
+                        <p class="text-sm text-gray-600">"Ideal para los amantes del pan japonés. Aquí encontrarán el auténtico shokupan, perfecto para sus sandos caseros, además de otros deliciosos panes y postres japoneses."</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-xl text-gray-800">MO+F (antes MOG Bistro)</h4>
+                        <p class="text-sm text-gray-600">"Un lugar con ambiente y una propuesta de comfort food japonesa y asiática muy variada. Si buscas un buen ramen o un curry japonés en un entorno agradable, esta es una excelente opción."</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-xl text-gray-800">Snowmilk Teas</h4>
+                        <p class="text-sm text-gray-600">"Para refrescarse con deliciosos milk teas, bubble teas y otras bebidas de inspiración asiática. Perfecto para acompañar un paseo."</p>
+                    </div>
+                     <div>
+                        <h4 class="font-bold text-xl text-gray-800">ABURIYA BY SHIGE TAKANE</h4>
+                        <p class="text-sm text-gray-600">"Para una experiencia de alta cocina japonesa, Aburiya es especialista en Yakiniku (parrilla japonesa). Ofrecen cortes de carne de primera calidad. Ideal para una ocasión especial."</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="anime-manga" class="py-16 scroll-mt-16">
+            <h2 class="text-3xl font-bold text-center section-title mb-12">Worlds on Paper and Screen: The Universe of Manga and Anime</h2>
+            <div class="content-card p-6 md:p-8">
+                <div class="max-w-3xl mx-auto mb-10 flex flex-col sm:flex-row items-center text-center sm:text-left space-y-4 sm:space-y-0 sm:space-x-6">
+                    <img src="https://placehold.co/112x112/9CA3AF/FFFFFF?text=Yo+Anime" alt="Mi avatar de anime" class="w-24 h-24 sm:w-28 sm:h-28 rounded-full border-2 border-red-500 object-cover shadow-md">
+                    <div>
+                        <p class="text-lg text-gray-700 leading-relaxed">
+                            ¡Bienvenidos a mi rincón favorito! El anime y el manga son universos llenos de historias increíbles, personajes inolvidables y arte que inspira. Aquí compartiré algunas series que considero esenciales y que espero disfruten tanto como yo.
+                        </p>
+                        <p class="text-xs text-gray-500 mt-1">(El avatar es un marcador de posición. Reemplaza la URL en 'src' con la de tu imagen).</p>
+                    </div>
+                </div>
+
+                <h3 class="text-2xl font-semibold text-red-600 mb-6 text-center">Un Vistazo a Series Imperdibles</h3>
+                <div class="space-y-8">
+                    <div><h4 class="font-bold text-xl text-gray-800">KonoSuba: God's Blessing on this Wonderful World!</h4><p class="text-sm text-gray-600">Kazuma es enviado a un mundo de fantasía con la inútil diosa Aqua. Famosa por su humor irreverente que parodia el isekai. (Fuente: Novela Ligera)</p></div>
+                    <div><h4 class="font-bold text-xl text-gray-800">Kaguya-sama: Love Is War</h4><p class="text-sm text-gray-600">Dos genios del consejo estudiantil intentan que el otro confiese su amor primero en ingeniosas batallas mentales. (Fuente: Manga)</p></div>
+                    <div><h4 class="font-bold text-xl text-gray-800">The Melancholy of Haruhi Suzumiya</h4><p class="text-sm text-gray-600">Kyon es arrastrado por Haruhi, quien inconscientemente altera la realidad, en busca de aliens y viajeros del tiempo. Revolucionó el anime. (Fuente: Novela Ligera)</p></div>
+                    <div><h4 class="font-bold text-xl text-gray-800">Saga of Tanya the Evil</h4><p class="text-sm text-gray-600">Un asalariado renace como una niña en un mundo en guerra y se une al ejército con crueldad y genio táctico. (Fuente: Novela Ligera)</p></div>
+                    <div><h4 class="font-bold text-xl text-gray-800">Solo Leveling</h4><p class="text-sm text-gray-600">El cazador más débil, Sung Jinwoo, obtiene un sistema que le permite subir de nivel sin límite. Acción trepidante. (Fuente: Webtoon Coreano)</p></div>
+                    <div><h4 class="font-bold text-xl text-gray-800">My Dress-Up Darling</h4><p class="text-sm text-gray-600">Un apasionado por las muñecas Hina y una chica popular amante del cosplay se unen para crear trajes. Tierna y detallada. (Fuente: Manga)</p></div>
+                    <div><h4 class="font-bold text-xl text-gray-800">Your Lie in April</h4><p class="text-sm text-gray-600">Un prodigio del piano traumatizado redescubre la música gracias a una violinista de espíritu libre. Emotiva y visualmente hermosa. (Fuente: Manga)</p></div>
+                    <div><h4 class="font-bold text-xl text-gray-800">Komi Can't Communicate</h4><p class="text-sm text-gray-600">Komi, popular pero con ansiedad social extrema, busca hacer 100 amigos con la ayuda de Tadano. Tierna y divertida. (Fuente: Manga)</p></div>
+                    <div><h4 class="font-bold text-xl text-gray-800">Wotakoi: Love is Hard for Otaku</h4><p class="text-sm text-gray-600">Explora los desafíos y alegrías de las relaciones románticas entre adultos otakus. Realista y relatable. (Fuente: Webmanga)</p></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="musica" class="py-16 scroll-mt-16">
+            <h2 class="text-3xl font-bold text-center section-title mb-12">The Resonant Beats: Exploring Japan's Modern Musical Landscape</h2>
+            <div class="content-card p-6 md:p-8">
+                <div class="mb-12">
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-4">Playlist Destacada: Mi Selección Japonesa</h3>
+                    <p class="text-gray-600 mb-2">Una selección especial de música moderna japonesa para que la disfrutes.</p>
+                    <div class="p-4 bg-gray-100 rounded-md text-center">
+                        <span class="text-5xl">🎧</span>
+                        <p class="mt-2 font-medium text-gray-700">¡Dale play a la música!</p>
+                        <a href="https://music.youtube.com/playlist?list=PLCIIUcGxVrt5McBaQhNVDoPvIiAIo3kQ0&si=YQGeXpMc-QopIjoN" target="_blank" class="mt-3 inline-block bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600 transition">Escuchar mi Playlist</a>
+                    </div>
+                </div>
+
+                <div class="mb-12">
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Galería Visual: Arte y Artistas (Conceptual)</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        <div class="aspect-square bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 shadow-md">Carátula 1</div>
+                        <div class="aspect-square bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 shadow-md">Carátula 2</div>
+                        <div class="aspect-square bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 shadow-md">Artista 1</div>
+                        <div class="aspect-square bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 shadow-md">Artista 2</div>
+                        <div class="aspect-square bg-gray-200 rounded-lg flex items-center justify-center text-gray-500 shadow-md">Artista 3</div>
+                    </div>
+                     <p class="mt-3 text-gray-500 text-xs text-center">Nota: En la página real se usarían imágenes de carátulas y artistas.</p>
+                </div>
+
+                <div>
+                    <h3 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Explorando Artistas Japoneses</h3>
+                    <div id="artist-tabs" class="mb-6 flex flex-wrap justify-center gap-2">
+                        </div>
+                    <div id="artist-content-area" class="min-h-[400px]">
+                        </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="endress" class="py-16 scroll-mt-16">
+            <h2 class="text-3xl font-bold text-center section-title mb-12">Endress+Hauser en Japón: Innovación Global con Impacto en México</h2>
+            <div class="content-card p-6 md:p-8 space-y-6">
+                <div>
+                    <h3 class="text-xl font-semibold text-red-600 mb-2">Endress+Hauser: Liderazgo Mundial</h3>
+                    <p class="text-gray-700 text-sm">Endress+Hauser es un proveedor global líder de instrumentación de medición, servicios y soluciones para la ingeniería de procesos industriales, ayudando a clientes a optimizar procesos, garantizar la seguridad y proteger el medio ambiente.</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-red-600 mb-2">Presencia Estratégica en Japón</h3>
+                    <p class="text-gray-700 text-sm">Endress+Hauser Japón atiende al exigente mercado japonés y funciona como un centro de competencia global, sirviendo a sectores como química, alimentos y bebidas, y energía.</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-red-600 mb-2">Yamanashi: Cuna de Innovación para el Mundo y México</h3>
+                    <p class="text-gray-700 text-sm mb-3">En Fuefuki, Yamanashi, opera un centro de producción e I+D para tecnologías de medición de nivel (Tank Gauging), temperatura y Soluciones de Gestión de Inventarios.</p>
+                    <p class="text-gray-700 text-sm font-medium mb-1">Enfoque en Tank Gauging:</p>
+                    <p class="text-gray-700 text-sm mb-3">Estos sistemas miden con precisión nivel, volumen, masa, etc., de líquidos en grandes tanques, crucial para control de inventarios y transferencia de custodia. La planta de Yamanashi produce instrumentos avanzados (ej. Proservo, Micropilot) para esta tarea.</p>
+                    <p class="text-gray-700 text-sm font-medium mb-1">Vínculo con México y su Industria Petrolera:</p>
+                    <p class="text-gray-700 text-sm mb-4">Para México, con su vital industria petrolera, la tecnología de Tank Gauging de Yamanashi es clave. Se implementa en refinerías y terminales para la gestión exacta del inventario de hidrocarburos, optimizando logística, reduciendo pérdidas y asegurando el cumplimiento normativo. La precisión de estos equipos contribuye a la eficiencia y seguridad en el sector petrolero mexicano.</p>
+                </div>
+                <div class="video-container my-6">
+                     <iframe src="https://www.youtube.com/embed/5iH_h_W4qXQ" title="Prevención de inundaciones en la Ciudad de México con Radares Levelflex FMP50 | #EndressHauser" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold text-red-600 mb-2">Calidad Japonesa, Impacto Global</h3>
+                    <p class="text-gray-700 text-sm">Los instrumentos de Yamanashi se exportan globalmente, llegando a México para apoyar a la industria nacional, demostrando la sinergia entre los centros de producción de E+H y las organizaciones locales como Endress+Hauser México.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="cultura" class="py-16 scroll-mt-16">
+            <h2 class="text-3xl font-bold text-center section-title mb-12">Harmony in Contrast: Japan's Dance Between Tradition and Modernity</h2>
+            <div class="content-card p-6 md:p-8 space-y-8">
+                <div>
+                    <p class="text-lg text-gray-700 leading-relaxed">Japón es una tierra donde el profundo respeto por las tradiciones ancestrales se entrelaza de manera única con una modernidad vertiginosa. Desde la serenidad de sus templos y la meticulosidad de sus artes tradicionales, hasta el neón de sus ciudades futuristas y su liderazgo tecnológico, esta dualidad define el alma del país.</p>
+                </div>
+                
+                <div> 
+                    <h3 class="text-2xl font-semibold text-red-600 mb-4">Raíces Profundas y Expresiones Modernas</h3>
+                    <p class="text-gray-700 text-sm mb-2">Festivales como los Matsuri llenan de color y fervor tanto pueblos pequeños como grandes ciudades. Artes como la ceremonia del té (Sadō), el arreglo floral (Ikebana) o la caligrafía (Shodō) siguen siendo practicadas y apreciadas, ofreciendo un contrapunto de calma y belleza a la vida moderna. El Kimono, aunque reservado para ocasiones especiales, sigue siendo un potente símbolo de identidad cultural.</p>
+                    <p class="text-gray-700 text-sm">Al mismo tiempo, Japón impulsa la vanguardia en robótica, diseño y cultura pop, con ciudades que son verdaderos laboratorios del futuro. La clave parece estar en el concepto de "Wa" (和), la armonía, que busca integrar estos elementos en un todo coherente.</p>
+                </div>
+
+                <div>
+                    <h3 class="text-2xl font-semibold text-red-600 mb-6">Reflejos Urbanos: Un Diálogo entre la Modernidad de Japón y la Vanguardia de Ciudad de México</h3>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="font-semibold text-xl text-gray-800 mb-2">El Pulso Incesante de las Megalópolis</h4>
+                            <p class="text-gray-700 text-sm">Tokio vibra con una actividad y eficiencia asombrosas. Como residente de Ciudad de México, reconozco ese pulso acelerado. CDMX, siempre a la vanguardia en el país, es un crisol de culturas y un imán para la innovación, similar al rol de Tokio como epicentro global.</p>
+                        </div>
+
+                        <div>
+                            <h4 class="font-semibold text-xl text-gray-800 mb-2">Tecnología entre lo Cotidiano y la Gran Infraestructura</h4>
+                            <p class="text-gray-700 text-sm mb-3">Japón lidera en tecnología y soluciones de infraestructura ante desastres, como sus avanzados sistemas de control de inundaciones. En Ciudad de México, también vemos una rápida integración tecnológica, desde la digitalización de trámites hasta la implementación de tecnología avanzada para la prevención, como los sistemas que utilizan radares de nivel (por ejemplo, los Levelflex FMP50 de Endress+Hauser) para la monitorización y prevención de inundaciones en puntos críticos. Es fascinante ver cómo se busca aplicar la innovación para mejorar la vida urbana y la resiliencia. Para ilustrar esta aplicación en CDMX, pueden ver el siguiente video:</p>
+                            <div class="video-container rounded-lg overflow-hidden shadow-xl my-4">
+                                <iframe src="https://www.youtube.com/embed/5iH_h_W4qXQ" title="Prevención de inundaciones en la Ciudad de México con Radares Levelflex FMP50 | #EndressHauser" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                            </div>
+                            <p class="text-gray-700 text-sm">Este tipo de soluciones demuestra cómo la tecnología avanzada se aplica activamente para enfrentar los desafíos urbanos en la capital mexicana, en un espíritu innovador similar al japonés.</p>
+                        </div>
+
+                        <div>
+                            <h4 class="font-semibold text-xl text-gray-800 mb-2">Movilidad Inteligente en Grandes Urbes</h4>
+                            <p class="text-gray-700 text-sm">El transporte público japonés es un referente por su puntualidad y eficiencia, con uso generalizado de tarjetas IC. Ciudad de México avanza en la modernización de su transporte, con opciones de pago móvil para el Metro o Metrobús, buscando mejorar la movilidad de millones.</p>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-xl text-gray-800 mb-2">El Atractivo de la Cultura Japonesa en el Corazón de México</h4>
+                            <p class="text-gray-700 text-sm">Japón es un gran exportador cultural. En Ciudad de México, esta influencia se vive intensamente, con numerosos eventos de temática japonesa e incluso un museo del manga, demostrando el profundo interés y cariño por las expresiones culturales de Japón.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white py-10 text-center">
+        <p class="text-sm">© 2025 Explorando Japón Interactivo. Creado con fines demostrativos y colaborativos.</p>
+        <p class="text-xs text-gray-400 mt-1">Toda la información de artistas, series y empresas se basa en datos públicos y debe ser verificada.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mobile menu toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', () => {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+
+            // Smooth scroll for nav links & close mobile menu
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    // Special case for home as it's the header, not a section with scroll-mt
+                    if (targetId === "#home") {
+                         window.scrollTo({ top: 0, behavior: 'smooth' });
+                    } else {
+                        const targetElement = document.querySelector(targetId);
+                        if (targetElement) {
+                             targetElement.scrollIntoView({
+                                behavior: 'smooth'
+                            });
+                        }
+                    }
+                    if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+            
+            const artists = [
+                { 
+                    id: 'yoasobi', name: 'YOASOBI',
+                    bio: 'YOASOBI es un dúo musical japonés compuesto por el productor Ayase y la vocalista Ikura. Formados en 2019, crean música basada en novelas e historias cortas.',
+                    popularSongs: ['夜に駆ける (Yoru ni Kakeru)', 'アイドル (Idol)', '怪物 (Kaibutsu/Monster)', '群青 (Gunjou)'],
+                    videoEmbed: 'https://www.youtube.com/embed/ZRtdQ81jPUQ', videoTitle: 'YOASOBI - アイドル (Idol) Official Music Video',
+                    mexicoCuriosities: 'Su canción "Idol" fue un fenómeno global en 2023. Han ganado gran popularidad en México a través del anime "Oshi no Ko".',
+                    imagePlaceholder: 'https://placehold.co/160x160/FF6347/FFFFFF?text=YOASOBI'
+                },
+                { 
+                    id: 'lisa', name: 'LiSA (Risa Oribe)',
+                    bio: 'Risa Oribe (LiSA) es una cantante y compositora japonesa, conocida por sus energéticas canciones para series de anime como "Sword Art Online" y "Demon Slayer".',
+                    popularSongs: ['紅蓮華 (Gurenge)', '炎 (Homura)', 'crossing field', 'ADAMAS'],
+                    videoEmbed: 'https://www.youtube.com/embed/CwkzK-F0Y00', videoTitle: 'LiSA - 紅蓮華 (Gurenge) / THE FIRST TAKE',
+                    mexicoCuriosities: 'Conocida como la "heroína del rock" del anison, tiene una gran base de fans en México, donde ha realizado conciertos.',
+                    imagePlaceholder: 'https://placehold.co/160x160/FFD700/000000?text=LiSA'
+                },
+                { 
+                    id: 'masayuki_suzuki', name: 'Masayuki Suzuki',
+                    bio: 'Conocido como el "Rey de las Canciones de Amor" de Japón. Ha ganado nueva fama internacional por los openings del anime "Kaguya-sama: Love Is War".',
+                    popularSongs: ['Love Dramatic feat. Rikka Ihara', 'DADDY! DADDY! DO! feat. Airi Suzuki', 'GIRI GIRI feat. Suu'],
+                    videoEmbed: 'https://www.youtube.com/embed/LKdF8X553cM', videoTitle: 'Masayuki Suzuki - DADDY! DADDY! DO! feat. Airi Suzuki',
+                    mexicoCuriosities: 'Su música ha llegado a una audiencia global más joven, incluyendo México, gracias a "Kaguya-sama: Love Is War".',
+                    imagePlaceholder: 'https://placehold.co/160x160/4682B4/FFFFFF?text=M.Suzuki'
+                },
+                { 
+                    id: 'kana_boon', name: 'KANA-BOON',
+                    bio: 'Banda de rock japonesa conocida por su sonido enérgico y temas para animes como "Naruto Shippuden" y "My Hero Academia".',
+                    popularSongs: ['シルエット (Silhouette)', 'スターマーカー (Starmarker)', 'ないものねだり (Naimononedari)'],
+                    videoEmbed: 'https://www.youtube.com/embed/DLjXp9fM0Xg', videoTitle: 'KANA-BOON - シルエット (Silhouette)',
+                    mexicoCuriosities: 'Su canción "Silhouette" es extremadamente popular entre los fans de "Naruto" en México y Latinoamérica.',
+                    imagePlaceholder: 'https://placehold.co/160x160/32CD32/FFFFFF?text=KANA-BOON'
+                },
+                { 
+                    id: 'zutomayo', name: 'ZUTOMAYO',
+                    bio: 'Zutto Mayonaka de Iinoni. es un enigmático grupo de rock japonés liderado por la vocalista ACAね, conocidos por su anonimato y videos musicales animados.',
+                    popularSongs: ['秒針を噛む (Byoushin wo Kamu)', 'お勉強しといてよ (Study Me)', '残機 (Time Left)'],
+                    videoEmbed: 'https://www.youtube.com/embed/GJI4Gv7NbmE', videoTitle: 'ZUTOMAYO - 秒針を噛む (Byoushin wo Kamu)',
+                    mexicoCuriosities: 'Han participado en bandas sonoras importantes como la de "Chainsaw Man". Su misterio es parte de su atractivo.',
+                    imagePlaceholder: 'https://placehold.co/160x160/8A2BE2/FFFFFF?text=ZUTOMAYO'
+                },
+                { 
+                    id: 'sumire_uesaka', name: 'Sumire Uesaka',
+                    bio: 'Actriz de voz (seiyuu) y cantante japonesa, conocida por su amor por la cultura rusa, que a menudo influye en su música y estética.',
+                    popularSongs: ['POP TEAM EPIC', 'EASY LOVE', 'Inner Urge'],
+                    videoEmbed: 'https://www.youtube.com/embed/p3jVDIpQ2pA', videoTitle: 'Sumire Uesaka - EASY LOVE',
+                    mexicoCuriosities: 'Voz de Nagatoro en "Don\'t Toy With Me, Miss Nagatoro". Su música a menudo incluye subtítulos en español en YouTube.',
+                    imagePlaceholder: 'https://placehold.co/160x160/FFB6C1/000000?text=S.Uesaka'
+                },
+                { 
+                    id: 'vaundy', name: 'Vaundy',
+                    bio: 'Joven y versátil cantautor, compositor y productor musical japonés. Conocido por cruzar múltiples géneros y producir su propia música.',
+                    popularSongs: ['怪獣の花唄 (Kaiju no Hanauta)', '踊り子 (Odoriko)', 'CHAINSAW BLOOD'],
+                    videoEmbed: 'https://www.youtube.com/embed/Um5M_zZ363A', videoTitle: 'Vaundy - 怪獣の花唄 (Kaiju no Hanauta)',
+                    mexicoCuriosities: 'Ha creado temas para animes populares como "Chainsaw Man" y "Ranking of Kings", aumentando su visibilidad internacional.',
+                    imagePlaceholder: 'https://placehold.co/160x160/00CED1/FFFFFF?text=Vaundy'
+                }
+            ];
+
+            const artistTabsContainer = document.getElementById('artist-tabs');
+            const artistContentArea = document.getElementById('artist-content-area');
+
+            if (artistTabsContainer && artistContentArea && artists.length > 0) {
+                artists.forEach((artist, index) => {
+                    const tabButton = document.createElement('button');
+                    tabButton.className = 'tab-button px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300';
+                    tabButton.textContent = artist.name;
+                    tabButton.dataset.artistId = artist.id;
+                    if (index === 0) { 
+                        tabButton.classList.add('active');
+                    }
+                    artistTabsContainer.appendChild(tabButton);
+
+                    tabButton.addEventListener('click', () => {
+                        artistTabsContainer.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                        tabButton.classList.add('active');
+                        displayArtistContent(artist.id);
+                    });
+                });
+
+                function displayArtistContent(artistId) {
+                    const artist = artists.find(a => a.id === artistId);
+                    if (artist) {
+                        artistContentArea.innerHTML = `
+                            <div class="content-card p-4 sm:p-6 md:p-8">
+                                <div class="md:flex md:items-start">
+                                    <img src="${artist.imagePlaceholder}" alt="${artist.name}" class="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full mx-auto md:mx-0 md:mr-6 shadow-md mb-4 md:mb-0 object-cover" onerror="this.src='https://placehold.co/160x160/cccccc/FFFFFF?text=Error+Img';">
+                                    <div class="text-center md:text-left flex-1">
+                                        <h4 class="text-2xl sm:text-3xl font-bold text-red-600 mb-2">${artist.name}</h4>
+                                        <p class="text-gray-600 mb-3 text-sm leading-relaxed">${artist.bio}</p>
+                                    </div>
+                                </div>
+                                <div class="mt-4">
+                                    <h5 class="text-lg sm:text-xl font-semibold text-gray-800 mb-2">Canciones Populares:</h5>
+                                    <ul class="list-disc list-inside text-gray-600 space-y-1 mb-4 text-sm">
+                                        ${artist.popularSongs.map(song => `<li>${song}</li>`).join('')}
+                                    </ul>
+                                </div>
+                                ${artist.videoEmbed ? `
+                                <div class="mt-4">
+                                    <h5 class="text-lg sm:text-xl font-semibold text-gray-800 mb-2">Video Destacado: ${artist.videoTitle || ''}</h5>
+                                    <div class="video-container">
+                                        <iframe src="${artist.videoEmbed.replace('watch?v=', 'embed/')}" title="${artist.videoTitle || artist.name + ' Video'}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                                    </div>
+                                </div>
+                                ` : ''}
+                                <div class="mt-4 p-3 bg-red-50 rounded-lg">
+                                    <h5 class="text-lg sm:text-xl font-semibold text-red-700 mb-1.5">Popularidad en México y Curiosidades:</h5>
+                                    <p class="text-red-800 text-sm leading-relaxed">${artist.mexicoCuriosities || 'Información sobre popularidad en México y curiosidades aparecerá aquí.'}</p>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+                displayArtistContent(artists[0].id); 
+            }
+        });
+    </script>
+</body>
+</html>
